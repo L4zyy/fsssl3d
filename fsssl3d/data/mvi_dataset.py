@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 
 class MultiviewImageDataset(Dataset):
-    def __init__(self, root_dir, mode='train', num_views=12, shuffle=True):
+    def __init__(self, root_dir, mode='train', num_model=0, num_views=12, shuffle=True):
         self.classnames=['airplane','bathtub','bed','bench','bookshelf','bottle','bowl','car','chair',
                          'cone','cup','curtain','desk','door','dresser','flower_pot','glass_box',
                          'guitar','keyboard','lamp','laptop','mantel','monitor','night_stand',
@@ -34,7 +34,10 @@ class MultiviewImageDataset(Dataset):
             # Select subset for different number of views (12 6 4 3 2 1)
             stride = int(12/self.num_views)
             all_files = all_files[::stride]
-            self.filepaths.extend(all_files)
+            if num_models == 0:
+                self.filepaths.extend(all_files)
+            else:
+                self.filepaths.extend(all_files[:min(num_models*num_views, len(all_files))])
         
         if shuffle == True:
             # permute

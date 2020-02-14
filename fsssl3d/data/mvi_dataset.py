@@ -34,10 +34,10 @@ class MultiviewImageDataset(Dataset):
             # Select subset for different number of views (12 6 4 3 2 1)
             stride = int(12/self.num_views)
             all_files = all_files[::stride]
-            if num_models == 0:
+            if num_model == 0:
                 self.filepaths.extend(all_files)
             else:
-                self.filepaths.extend(all_files[:min(num_models*num_views, len(all_files))])
+                self.filepaths.extend(all_files[:min(num_model*num_views, len(all_files))])
         
         if shuffle == True:
             # permute

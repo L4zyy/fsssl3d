@@ -24,6 +24,10 @@ def get_parser():
                         help='number of episodes',
                         default=5)
 
+    parser.add_argument('-t', '--train_ratio', type=float,
+                        help='ratio of train and validation',
+                        default=0.8)
+
     parser.add_argument('--cuda', action='store_true',
                         help='enable cuda')
 

@@ -2,9 +2,11 @@ import numpy as np
 import torch
 
 class PrototypicalBatchSampler(object):
-    def __init__(self, labels, num_way, num_support, num_query, num_episode):
+    def __init__(self, labels, mode, train_ratio, num_way, num_support, num_query, num_episode):
         super(PrototypicalBatchSampler, self).__init__()
 
+        self.mode = mode
+        self.train_ratio = train_ratio
         self.num_way = num_way
         self.num_sample = num_support + num_query
         self.num_episode = num_episode
@@ -24,7 +26,16 @@ class PrototypicalBatchSampler(object):
             class_idxs = torch.randperm(len(self.classes))[:self.num_way]
 
             for i, c_idx in enumerate(class_idxs):
-                s_idxs = torch.randperm(int(self.counts[c_idx]))[:self.num_sample]
+                c_size = int(self.counts[c_idx])
+                train_size = int(c_size*self.train_ratio)
+                val_size = c_size - train_size
+                if self.mode == 'train' and val_size > self.num_sample:
+                    s_idxs = torch.randperm(train_size)[:self.num_sample]
+                elif self.mode == 'val' and val_size > self.num_sample:
+                    s_idxs = torch.randperm(val_size)[:self.num_sample]
+                    s_idxs = list(map(lambda x : x+train_size, s_idxs))
+                else:
+                    s_idxs = torch.randperm(c_size)[:self.num_sample]
                 batch[i*self.num_sample : (i+1)*self.num_sample] = self.indices[c_idx][s_idxs]
 
             yield batch

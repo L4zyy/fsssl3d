@@ -20,8 +20,8 @@ class MultiviewImageDataset(Dataset):
         self.num_views = num_views
         self.transform = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225]),
+            # transforms.Normalize(mean=[0.485, 0.456, 0.406],
+            #                      std=[0.229, 0.224, 0.225]),
         ])
 
         self.filepaths = []
@@ -48,6 +48,7 @@ class MultiviewImageDataset(Dataset):
             self.filepaths = filepaths_new
         
         self.y = list(map(lambda path: path.split(os.sep)[-3], self.filepaths[::self.num_views]))
+        self.y = list(map(lambda name: self.classnames.index(name), self.y))
         
     def __len__(self):
         return int(len(self.filepaths)/self.num_views)
@@ -68,5 +69,6 @@ if __name__ == "__main__":
     dataset = MultiviewImageDataset('datasets/modelnet40_images_new_12x', mode='train', num_views=12, shuffle=True)
 
     sample = dataset[0]
-    print("[{}] {}".format(sample[0], sample[1].shape))
-    print("\n".join(sample[2]))
+    # print("[{}] {}".format(sample[0], sample[1].shape))
+    # print("\n".join(sample[2]))
+    print(dataset.y)

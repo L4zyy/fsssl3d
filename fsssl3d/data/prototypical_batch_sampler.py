@@ -16,7 +16,8 @@ class PrototypicalBatchSampler(object):
         # index table
         self.indices = np.empty((len(self.classes), max(self.counts)), dtype=int) * np.nan
         for idx, label in enumerate(labels):
-            class_idx = np.argwhere(self.classes == label).item()
+            # class_idx = np.argwhere(self.classes == label).item()
+            class_idx = label
             self.indices[class_idx, np.argwhere(np.isnan(self.indices[class_idx]))[0]] = idx
     
     def __iter__(self):

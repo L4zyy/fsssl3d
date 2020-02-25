@@ -8,6 +8,10 @@ def get_parser():
                         help='dataset root directory',
                         default='.' + os.sep + 'datasets' + os.sep + 'modelnet40_images_new_12x')
 
+    parser.add_argument('-result', '--result_root_dir', type=str,
+                        help='result root directory',
+                        default='.' + os.sep + 'result')
+
     parser.add_argument('-w', '--num_way', type=int,
                         help='number of ways',
                         default=5)
@@ -30,5 +34,10 @@ def get_parser():
 
     parser.add_argument('--cuda', action='store_true',
                         help='enable cuda')
+
+    parser.add_argument('--seed', type=int,
+                        help='random seed',
+                        default=1)
+
 
     return parser

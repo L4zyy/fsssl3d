@@ -12,6 +12,10 @@ def get_parser():
                         help='result root directory',
                         default='.' + os.sep + 'result')
 
+    parser.add_argument('-v', '--num_views', type=int,
+                        help='number of views',
+                        default=12)
+
     parser.add_argument('-w', '--num_way', type=int,
                         help='number of ways',
                         default=5)
@@ -25,8 +29,12 @@ def get_parser():
                         default=5)
 
     parser.add_argument('-e', '--num_episode', type=int,
-                        help='number of episodes',
-                        default=5)
+                        help='number of episodes per epoch',
+                        default=100)
+
+    parser.add_argument('-epoch', '--num_epoches', type=int,
+                        help='number of epoches',
+                        default=100)
 
     parser.add_argument('-t', '--train_ratio', type=float,
                         help='ratio of train and validation',

@@ -97,10 +97,10 @@ if __name__ == "__main__":
 
     # load data
     train_dataset = MultiviewImageDataset(args.dataset_root_dir, mode='train', num_views=args.num_views)
-    test_dataset = MultiviewImageDataset(args.dataset_root_dir, mode='test')
+    test_dataset = MultiviewImageDataset(args.dataset_root_dir, mode='test', num_views=args.num_views)
     train_sampler=PrototypicalBatchSampler(train_dataset.y, 'train', args.train_ratio, args.num_way, args.num_support, args.num_query, args.num_episode)
     val_sampler=PrototypicalBatchSampler(train_dataset.y, 'val', args.train_ratio, args.num_way, args.num_support, args.num_query, args.num_episode)
-    test_sampler=PrototypicalBatchSampler(train_dataset.y, 'test', args.train_ratio, args.num_way, args.num_support, args.num_query, args.num_episode)
+    test_sampler=PrototypicalBatchSampler(test_dataset.y, 'test', args.train_ratio, args.num_way, args.num_support, args.num_query, args.num_episode)
     train_loader = DataLoader(train_dataset, batch_sampler=train_sampler)
     val_loader = DataLoader(train_dataset, batch_sampler=val_sampler)
     test_loader = DataLoader(test_dataset, batch_sampler=test_sampler)

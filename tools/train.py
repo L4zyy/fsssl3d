@@ -105,6 +105,9 @@ if __name__ == "__main__":
     val_loader = DataLoader(train_dataset, batch_sampler=val_sampler)
     test_loader = DataLoader(test_dataset, batch_sampler=test_sampler)
 
+    print(test_sampler.counts.min())
+    exit()
+
     # check GPU availability
     device = 'cuda:0' if torch.cuda.is_available() and args.cuda else 'cpu'
     print('Using device: ' + device)

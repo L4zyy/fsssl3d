@@ -20,8 +20,8 @@ class MultiviewImageDataset(Dataset):
         self.num_views = num_views
         self.transform = transforms.Compose([
             transforms.ToTensor(),
-            # transforms.Normalize(mean=[0.485, 0.456, 0.406],
-            #                      std=[0.229, 0.224, 0.225]),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
         ])
 
         self.filepaths = []
@@ -34,18 +34,19 @@ class MultiviewImageDataset(Dataset):
             # Select subset for different number of views (12 6 4 3 2 1)
             stride = int(12/self.num_views)
             all_files = all_files[::stride]
+            # shuffle
+            if shuffle == True:
+                # permute
+                rand_idx = np.random.permutation(int(len(all_files)/self.num_views))
+                files_new = []
+                for i in range(len(rand_idx)):
+                    files_new.extend(all_files[rand_idx[i]*self.num_views : (rand_idx[i]+1)*self.num_views])
+                all_files = files_new
+            # limit model number
             if num_model == 0:
                 self.filepaths.extend(all_files)
             else:
                 self.filepaths.extend(all_files[:min(num_model*num_views, len(all_files))])
-        
-        if shuffle == True:
-            # permute
-            rand_idx = np.random.permutation(int(len(self.filepaths)/self.num_views))
-            filepaths_new = []
-            for i in range(len(rand_idx)):
-                filepaths_new.extend(self.filepaths[rand_idx[i]*self.num_views : (rand_idx[i]+1)*self.num_views])
-            self.filepaths = filepaths_new
         
         self.y = list(map(lambda path: path.split(os.sep)[-3], self.filepaths[::self.num_views]))
         self.y = list(map(lambda name: self.classnames.index(name), self.y))

@@ -50,25 +50,27 @@ def test(args, test_loader, model, loss_fn):
 if __name__ == "__main__":
     args = get_parser().parse_args()
 
+    init_seed(args)
+
     # load data
-    test_dataset = MultiviewImageDataset(args.dataset_root_dir, mode='test', num_views=args.num_views)
-    test_sampler=PrototypicalBatchSampler(test_dataset.y, 'test', args.train_ratio, args.num_way, args.num_support, args.num_query, args.num_episode)
-    test_loader = DataLoader(test_dataset, batch_sampler=test_sampler)
+    dataset = MultiviewImageDataset(args.dataset_root_dir, mode='train', num_views=args.num_views)
+
+    random_class = torch.randperm(len(dataset.classnames))
+    test_classes = random_class[args.train_size + args.val_size:]
+
+    test_sampler=PrototypicalBatchSampler(dataset.y, test_classes, args.num_way, args.num_support, args.num_query, args.num_episode)
+    test_loader = DataLoader(dataset, batch_sampler=test_sampler)
 
     # check GPU availability
     device = 'cuda:0' if torch.cuda.is_available() and args.cuda else 'cpu'
     print('Using device: ' + device)
 
-    init_seed(args)
-
-    # single = SVCNN("MVCNN", nclasses=40, pretraining=False, cnn_name="vgg11")
-    # model = MVCNN("MVCNN", single, nclasses=40, cnn_name="vgg11", num_views=args.num_views)
-    # model.net_2 = model.net_2[:4]
-    # del single
-    model = SVCNN("MVCNN", nclasses=40, pretraining=False, cnn_name="vgg11")
+    single = SVCNN("MVCNN", nclasses=40, pretraining=True, cnn_name="vgg11")
+    model = MVCNN("MVCNN", single, nclasses=40, cnn_name="vgg11", num_views=args.num_views)
     model.net_2 = model.net_2[:4]
+    del single
 
-    best_model_path = os.path.join(args.result_root_dir, 'best_model.pth')
+    best_model_path = os.path.join(args.result_root_dir, args.name + '_best_model.pth')
     model.load_state_dict(torch.load(best_model_path))
     model.eval()
 

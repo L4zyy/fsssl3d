@@ -4,6 +4,10 @@ import os
 def get_parser():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('-n', '--name', type=str,
+                        help='name for this run',
+                        default='demo')
+
     parser.add_argument('-root', '--dataset_root_dir', type=str,
                         help='dataset root directory',
                         default='.' + os.sep + 'datasets' + os.sep + 'modelnet40_images_new_12x')
@@ -36,9 +40,13 @@ def get_parser():
                         help='number of epoches',
                         default=100)
 
-    parser.add_argument('-t', '--train_ratio', type=float,
-                        help='ratio of train and validation',
-                        default=0.8)
+    parser.add_argument('--train_size', type=int,
+                        help='number of class for train',
+                        default=24)
+
+    parser.add_argument('--val_size', type=int,
+                        help='number of class for validation',
+                        default=6)
 
     parser.add_argument('--cuda', action='store_true',
                         help='enable cuda')

@@ -25,14 +25,14 @@ def init_seed(args):
 def train(args, train_loader, val_loader, model, optim, loss_fn):
     device = 'cuda:0' if torch.cuda.is_available() and args.cuda else 'cpu'
 
-    writer = SummaryWriter(args.result_root_dir)
+    writer = SummaryWriter(args.result_root_dir + os.sep + args.name)
 
     best_state = None
     best_acc = 0
     i_acc = 0
 
-    best_model_path = os.path.join(args.result_root_dir, 'best_model.pth')
-    last_model_path = os.path.join(args.result_root_dir, 'last_model.pth')
+    best_model_path = os.path.join(args.result_root_dir, args.name + '_best_model.pth')
+    last_model_path = os.path.join(args.result_root_dir, args.name + '_last_model.pth')
 
     model = model.to(device)
     model.train()
@@ -95,26 +95,34 @@ def train(args, train_loader, val_loader, model, optim, loss_fn):
 if __name__ == "__main__":
     args = get_parser().parse_args()
 
-    # load data
-    train_dataset = MultiviewImageDataset(args.dataset_root_dir, mode='train', num_views=args.num_views)
-    test_dataset = MultiviewImageDataset(args.dataset_root_dir, mode='test', num_views=args.num_views)
-    train_sampler=PrototypicalBatchSampler(train_dataset.y, 'train', args.train_ratio, args.num_way, args.num_support, args.num_query, args.num_episode)
-    val_sampler=PrototypicalBatchSampler(train_dataset.y, 'val', args.train_ratio, args.num_way, args.num_support, args.num_query, args.num_episode)
-    test_sampler=PrototypicalBatchSampler(test_dataset.y, 'test', args.train_ratio, args.num_way, args.num_support, args.num_query, args.num_episode)
-    train_loader = DataLoader(train_dataset, batch_sampler=train_sampler)
-    val_loader = DataLoader(train_dataset, batch_sampler=val_sampler)
-    test_loader = DataLoader(test_dataset, batch_sampler=test_sampler)
+    init_seed(args)
 
-    print(test_sampler.counts.min())
-    exit()
+    # load data
+    dataset = MultiviewImageDataset(args.dataset_root_dir, mode='train', num_views=args.num_views)
+
+    # split data classes
+    random_class = torch.randperm(len(dataset.classnames))
+    train_classes = random_class[:args.train_size]
+    val_classes = random_class[args.train_size: args.train_size + args.val_size]
+    test_classes = random_class[args.train_size + args.val_size:]
+
+    train_sampler=PrototypicalBatchSampler(dataset.y, train_classes, args.num_way, args.num_support, args.num_query, args.num_episode)
+    val_sampler=PrototypicalBatchSampler(dataset.y, val_classes, args.num_way, args.num_support, args.num_query, args.num_episode)
+    test_sampler=PrototypicalBatchSampler(dataset.y, test_classes, args.num_way, args.num_support, args.num_query, args.num_episode)
+    train_loader = DataLoader(dataset, batch_sampler=train_sampler)
+    val_loader = DataLoader(dataset, batch_sampler=val_sampler)
+    test_loader = DataLoader(dataset, batch_sampler=test_sampler)
+
+    # batch = next(iter(train_loader))
+    # print(batch[0])
+    # print(test_classes)
+    # exit()
 
     # check GPU availability
     device = 'cuda:0' if torch.cuda.is_available() and args.cuda else 'cpu'
     print('Using device: ' + device)
 
-    init_seed(args)
-
-    single = SVCNN("MVCNN", nclasses=40, pretraining=False, cnn_name="vgg11")
+    single = SVCNN("MVCNN", nclasses=40, pretraining=True, cnn_name="vgg11")
     model = MVCNN("MVCNN", single, nclasses=40, cnn_name="vgg11", num_views=args.num_views)
     model.net_2 = model.net_2[:4]
     del single

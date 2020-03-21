@@ -28,7 +28,7 @@ class PrototypicalLoss(nn.Module):
 
         loss_val = -log_p_y.gather(2, target_inds).squeeze().view(-1).mean()
         _, y_hat = log_p_y.max(2)
-        acc_val = y_hat.eq(target_inds.squeeze()).float().mean()
+        acc_val = y_hat.eq(target_inds.squeeze().view(y_hat.shape)).float().mean()
 
         return loss_val,  acc_val
 
